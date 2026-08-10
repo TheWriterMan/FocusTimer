@@ -3,7 +3,7 @@ Add-Type -AssemblyName System.Drawing
 [System.Windows.Forms.Application]::EnableVisualStyles()
 $ErrorActionPreference = 'Stop'
 
-$mutex = [System.Threading.Mutex]::new($false, 'Local\PersonalWorkTimer')
+$mutex = [System.Threading.Mutex]::new($false, 'Local\PersonalFocusTimer')
 $locked = $false
 $timer = $null
 $notify = $null
@@ -14,15 +14,19 @@ try {
 
     if (-not $locked) {
         [System.Windows.Forms.MessageBox]::Show(
-            'Work Timer is already running in the notification area.',
-            'Work Timer', 'OK', 'Information') | Out-Null
+            'Focus Timer is already running in the notification area.',
+            'Focus Timer', 'OK', 'Information') | Out-Null
         return
     }
 
     $localData = [Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)
-    $stateDirectory = Join-Path $localData 'WorkTimer'
+    $stateDirectory = Join-Path $localData 'FocusTimer'
     $stateFile = Join-Path $stateDirectory 'state.json'
+    $legacyStateFile = Join-Path (Join-Path $localData 'WorkTimer') 'state.json'
     [IO.Directory]::CreateDirectory($stateDirectory) | Out-Null
+    if (-not (Test-Path -LiteralPath $stateFile) -and (Test-Path -LiteralPath $legacyStateFile)) {
+        Copy-Item -LiteralPath $legacyStateFile -Destination $stateFile
+    }
     $utf8 = New-Object System.Text.UTF8Encoding($false)
 
     $script:seconds = 0.0
@@ -62,14 +66,14 @@ try {
     }
 
     $form = New-Object System.Windows.Forms.Form
-    $form.Text = 'Work Timer'
+    $form.Text = 'Focus Timer'
     $form.ClientSize = New-Object System.Drawing.Size(360, 220)
     $form.StartPosition = 'CenterScreen'
     $form.FormBorderStyle = 'FixedSingle'
     $form.MaximizeBox = $false
 
     $titleLabel = New-Object System.Windows.Forms.Label
-    $titleLabel.Text = 'WORK TIMER'
+    $titleLabel.Text = 'FOCUS TIMER'
     $titleLabel.Font = New-Object Drawing.Font('Segoe UI Semibold', 10)
     $titleLabel.TextAlign = 'MiddleCenter'
     $titleLabel.SetBounds(65, 16, 230, 24)
@@ -191,7 +195,7 @@ try {
         $toggleButton.Text = if ($script:running) { 'Pause' } else { 'Resume' }
         $toggleItem.Text = if ($script:running) { 'Pause timer' } else { 'Resume timer' }
         $statusItem.Text = "$time - $status"
-        $tip = "Work Timer: $time ($status)"
+        $tip = "Focus Timer: $time ($status)"
         if ($tip.Length -gt 63) { $tip = $tip.Substring(0, 63) }
         $notify.Text = $tip
     }
@@ -219,7 +223,7 @@ try {
     function Reset-Timer {
         $answer = [Windows.Forms.MessageBox]::Show(
             'Reset the timer to 00:00:00 and continue running?',
-            'Reset Work Timer', 'YesNo', 'Question')
+            'Reset Focus Timer', 'YesNo', 'Question')
         if ($answer -eq 'Yes') {
             $script:seconds = 0.0
             $script:running = $true
@@ -278,7 +282,7 @@ try {
     Apply-Theme
     Save-State
     $timer.Start()
-    $notify.ShowBalloonTip(2000, 'Work Timer', "Running in the notification area at $(Format-Time $script:seconds).", 'Info')
+    $notify.ShowBalloonTip(2000, 'Focus Timer', "Running in the notification area at $(Format-Time $script:seconds).", 'Info')
     [Windows.Forms.Application]::Run()
 }
 finally {

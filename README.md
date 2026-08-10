@@ -1,8 +1,8 @@
-# Work Timer
+# Focus Timer
 
 A tiny Windows tray timer for tracking awake working time without manually starting and stopping every session.
 
-Work Timer keeps counting while Windows is awake, ignores long sleep/hibernate gaps, survives accidental window closure, and restores the saved total after restart. Everything stays on your computer.
+Focus Timer keeps counting while Windows is awake, ignores long sleep/hibernate gaps, survives accidental window closure, and restores the saved total after restart. Everything stays on your computer.
 
 ## Requirements
 
@@ -24,7 +24,7 @@ To launch automatically when you sign in:
 powershell -NoProfile -ExecutionPolicy Bypass -File .\Install.ps1 -StartWithWindows -Launch
 ```
 
-The installer adds **Work Timer** to the Desktop and Start menu. Existing timer data is preserved when reinstalling.
+The installer adds **Focus Timer** to the Desktop and Start menu. Existing Focus Timer data is preserved when reinstalling, and saved Work Timer state is migrated automatically.
 
 ## Use
 
@@ -40,12 +40,12 @@ Sleep and hibernation gaps longer than five seconds are ignored. If the process 
 Timer state is stored at:
 
 ```text
-%LOCALAPPDATA%\WorkTimer\state.json
+%LOCALAPPDATA%\FocusTimer\state.json
 ```
 
 ## Run without installing
 
-Double-click `WorkTimer.bat`. The timer runs in the notification area and stores state in the same location.
+Double-click `FocusTimer.bat`. The timer runs in the notification area and stores state in the same location.
 
 ## Uninstall
 
@@ -63,4 +63,4 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\Uninstall.ps1 -RemoveData
 
 ## Privacy
 
-Work Timer has no network requests, telemetry, accounts, or cloud storage.
+Focus Timer has no network requests, telemetry, accounts, or cloud storage.
