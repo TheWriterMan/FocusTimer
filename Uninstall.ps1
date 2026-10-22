@@ -4,8 +4,15 @@ param([switch]$RemoveData)
 $ErrorActionPreference = 'Stop'
 $root = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'FocusTimer'
 $app = Join-Path $root 'App'
-$scriptPath = Join-Path $app 'FocusTimerTray.ps1'
+$exePath = Join-Path $app 'FocusTimer.exe'
 
+# Stop the running exe
+Get-Process -Name 'FocusTimer' -ErrorAction SilentlyContinue |
+    Where-Object { $_.Path -eq $exePath } |
+    ForEach-Object { $_.CloseMainWindow() | Out-Null; if (-not $_.WaitForExit(3000)) { Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue } }
+
+# Also stop any legacy PowerShell-hosted instance
+$scriptPath = Join-Path $app 'FocusTimerTray.ps1'
 Get-CimInstance Win32_Process |
     Where-Object { $_.Name -match '^powershell(\.exe)?$' -and $_.CommandLine -like "*${scriptPath}*" } |
     ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
